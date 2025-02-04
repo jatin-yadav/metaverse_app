@@ -1,4 +1,7 @@
 import { Router } from "express";
+import { userRouter } from "./user";
+import { spaceRouter } from "./space";
+import { adminRouter } from "./admin";
 
 export const router = Router();
 
@@ -18,4 +21,6 @@ router.get("/avatars", (req, res) => {
   res.json({ message: "Elements" });
 });
 
-// router.use('/user',userRouter);'
+router.use("/user", userRouter);
+router.use("/space", spaceRouter);
+router.use("/admin", adminRouter);
