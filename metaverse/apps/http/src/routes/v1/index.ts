@@ -2,10 +2,20 @@ import { Router } from "express";
 
 export const router = Router();
 
-router.get("/signup", (req, res) => {
-  res.json({ message: "Signup"});
+router.post("/signup", (req, res) => {
+  res.json({ message: "Signup" });
 });
 
-router.get("/signin", (req, res) => {
-  res.json({ message: "Signin"});
+router.post("/signin", (req, res) => {
+  res.json({ message: "Signin" });
 });
+
+router.get("/elements", (req, res) => {
+  res.json({ message: "Elements" });
+});
+
+router.get("/avatars", (req, res) => {
+  res.json({ message: "Elements" });
+});
+
+// router.use('/user',userRouter);'
