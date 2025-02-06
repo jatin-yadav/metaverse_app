@@ -1,6 +1,6 @@
-import { Router } from "express";
+import { Router, type Router as ExpressRouter } from "express";
 
-export const userRouter = Router();
+export const userRouter: ExpressRouter = Router();
 
 userRouter.post("/metadata", (req, res) => {
   res.json({ message: "Metadata" });

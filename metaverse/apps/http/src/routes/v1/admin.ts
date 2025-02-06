@@ -1,6 +1,6 @@
-import { Router } from "express";
+import { Router, type Router as ExpressRouter } from "express";
 
-export const adminRouter = Router();
+export const adminRouter: ExpressRouter = Router();
 
 adminRouter.post("/element", (req, res) => {});
 
