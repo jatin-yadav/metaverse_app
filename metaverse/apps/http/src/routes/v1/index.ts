@@ -7,24 +7,28 @@ import {
 import { userRouter } from "./user";
 import { spaceRouter } from "./space";
 import { adminRouter } from "./admin";
-import { SignupSchema } from "../../types";
+import { SigninSchema, SignupSchema } from "../../types";
 import client from "@repo/db/client";
-
+import { hash, compare } from "../../scrypt";
+import jwt from "jsonwebtoken";
+import { JWT_SCRETE_KEY } from "../../config";
 export const router: ExpressRouter = Router();
 
 router.post("/signup", async (req: Request, res: Response) => {
-  const parseData = SignupSchema.safeParse(req.body);
-  if (!parseData.success) {
+  const parsedData = SignupSchema.safeParse(req.body);
+  if (!parsedData.success) {
     res.status(400).json({ message: "Invalid data validation failed" });
     return;
   }
 
+  const hashedPassword = await hash(parsedData.data.password);
+
   try {
     const user = await client.user.create({
       data: {
-        username: parseData.data.username,
-        password: parseData.data.password,
-        role: parseData.data.type === "admin" ? "Admin" : "User",
+        username: parsedData.data.username,
+        password: hashedPassword,
+        role: parsedData.data.type === "admin" ? "Admin" : "User",
       },
     });
 
@@ -34,7 +38,40 @@ router.post("/signup", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/signin", (req, res) => {
+router.post("/signin", async (req, res) => {
+  const parsedData = SigninSchema.safeParse(req.body);
+  if (!parsedData.success) {
+    res.status(400).json({ message: "Invalid data validation failed" });
+    return;
+  }
+
+  try {
+    const user = await client.user.findUnique({
+      where: {
+        username: parsedData.data.username,
+      },
+    });
+
+    if (!user) {
+      res.status(400).json({ message: "User not found" });
+      return;
+    }
+    const isValid = await compare(parsedData.data.password, user.password);
+
+    if (!isValid) {
+      res.status(400).json({ message: "Invalid password" });
+      return;
+    }
+
+    const token = jwt.sign(
+      { userID: user.id, role: user.role },
+      JWT_SCRETE_KEY
+    );
+
+    res.json({ token });
+  } catch (error) {
+    res.status(400).json({ message: "somthing went wrong" });
+  }
   res.json({ message: "Signin" });
 });
 

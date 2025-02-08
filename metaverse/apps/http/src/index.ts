@@ -5,8 +5,11 @@ import client from "@repo/db/client";
 const app = express();
 
 app.use(express.json());
-
 app.use("/api/v1", router);
+
+app.get("/", (req, res) => {
+  res.send("Http server is running");
+});
 app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+  console.log("Server is running on port 3000 http://localhost:3000");
 });
