@@ -12,6 +12,7 @@ import client from "@repo/db/client";
 import { hash, compare } from "../../scrypt";
 import jwt from "jsonwebtoken";
 import { JWT_SCRETE_KEY } from "../../config";
+import { log } from "node:console";
 export const router: ExpressRouter = Router();
 
 router.post("/signup", async (req: Request, res: Response) => {
@@ -24,6 +25,7 @@ router.post("/signup", async (req: Request, res: Response) => {
   const hashedPassword = await hash(parsedData.data.password);
 
   try {
+    console.log("parsedData", parsedData);
     const user = await client.user.create({
       data: {
         username: parsedData.data.username,
@@ -32,8 +34,9 @@ router.post("/signup", async (req: Request, res: Response) => {
       },
     });
 
-    res.json({ userID: user.id });
+    res.status(200).json({ userID: user.id });
   } catch (error) {
+    console.log("ERROR:=======>", error);
     res.status(400).json({ message: "user already exist" });
   }
 });
@@ -68,8 +71,9 @@ router.post("/signin", async (req, res) => {
       JWT_SCRETE_KEY
     );
 
-    res.json({ token });
+    res.status(200).json({ token });
   } catch (error) {
+    console.log("ERROR:=======>", error);
     res.status(400).json({ message: "somthing went wrong" });
   }
   res.json({ message: "Signin" });
