@@ -16,35 +16,54 @@ import { log } from "node:console";
 export const router: ExpressRouter = Router();
 
 router.post("/signup", async (req: Request, res: Response) => {
+  console.log("req body", req.body);
   const parsedData = SignupSchema.safeParse(req.body);
   if (!parsedData.success) {
-    res.status(400).json({ message: "Invalid data validation failed" });
+    console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors
+    res.status(400).json({
+      message: "Invalid data validation failed",
+      errors: parsedData.error.format(),
+    });
     return;
   }
 
   const hashedPassword = await hash(parsedData.data.password);
 
   try {
-    console.log("parsedData", parsedData);
-    const user = await client.user.create({
-      data: {
+    const user = await client.user.findFirst({
+      where: {
         username: parsedData.data.username,
-        password: hashedPassword,
-        role: parsedData.data.type === "admin" ? "Admin" : "User",
       },
     });
 
-    res.status(200).json({ userID: user.id });
+    if (user) {
+      res.status(400).json({ message: "User allready exists" });
+      return;
+    }
+
+    const newuser = await client.user.create({
+      data: {
+        username: parsedData.data.username,
+        password: hashedPassword,
+        role: parsedData.data.type == "admin" ? "Admin" : "User",
+      },
+    });
+
+    res.status(200).json({ userID: newuser.id });
   } catch (error) {
     console.log("ERROR:=======>", error);
-    res.status(400).json({ message: "user already exist" });
+    res.status(400).json({ message: "server error somthing went wrong" });
   }
 });
 
 router.post("/signin", async (req, res) => {
   const parsedData = SigninSchema.safeParse(req.body);
   if (!parsedData.success) {
-    res.status(400).json({ message: "Invalid data validation failed" });
+    console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors
+    res.status(400).json({
+      message: "Invalid data validation failed",
+      errors: parsedData.error.format(),
+    });
     return;
   }
 
@@ -76,7 +95,6 @@ router.post("/signin", async (req, res) => {
     console.log("ERROR:=======>", error);
     res.status(400).json({ message: "somthing went wrong" });
   }
-  res.json({ message: "Signin" });
 });
 
 router.get("/elements", (req, res) => {

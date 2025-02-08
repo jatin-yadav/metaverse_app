@@ -1,15 +1,21 @@
 import express from "express";
 import { router } from "./routes/v1";
-import client from "@repo/db/client";
+import { testDbConnection } from "./checkDb";
 
 const app = express();
-
 app.use(express.json());
 app.use("/api/v1", router);
 
 app.get("/", (req, res) => {
   res.send("Http server is running");
 });
-app.listen(3000, () => {
-  console.log("Server is running on port 3000 http://localhost:3000");
-});
+
+const startServer = async () => {
+  await testDbConnection();
+
+  app.listen(3000, () => {
+    console.log("🚀 Server is running on port 3000: http://localhost:3000");
+  });
+};
+
+startServer();
