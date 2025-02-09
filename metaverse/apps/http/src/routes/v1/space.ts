@@ -1,10 +1,16 @@
 import client from "@repo/db/client";
 import { Router, type Router as ExpressRouter } from "express";
-import { CreateSpaceSchema } from "../../types";
+import {
+  AddElementSchema,
+  CreateElementSchema,
+  CreateSpaceSchema,
+  DeleteElementSchema,
+} from "../../types";
+import { userMiddleware } from "../../middleware/user";
 
 export const spaceRouter: ExpressRouter = Router();
 
-spaceRouter.post("/", async (req, res) => {
+spaceRouter.post("/", userMiddleware, async (req, res) => {
   const parsedData = CreateSpaceSchema.safeParse(req.body);
   if (!parsedData.success) {
     console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors
@@ -66,12 +72,159 @@ spaceRouter.post("/", async (req, res) => {
   res.json({ message: "Space created successfully", spaceId: space.id });
 });
 
-spaceRouter.delete("/:spaceId", (req, res) => {});
+spaceRouter.delete("/:spaceId", userMiddleware, async (req, res) => {
+  const space = await client.space.findUnique({
+    where: {
+      id: req.params.spaceId,
+    },
+    select: {
+      creatorId: true,
+    },
+  });
 
-spaceRouter.get("/all", (req, res) => {});
+  if (!space) {
+    res.status(400).json({ message: "Space not found" });
+    return;
+  }
 
-spaceRouter.post("/elmement", (req, res) => {});
+  if (space?.creatorId !== req.userId) {
+    res.status(403).json({ message: "Unauthorized" });
+    return;
+  }
 
-spaceRouter.delete("/elmement", (req, res) => {});
+  await client.space.delete({
+    where: {
+      id: req.params.spaceId,
+    },
+  });
 
-spaceRouter.get("/:spaceId", (req, res) => {});
+  res.json({ message: "Space deleted successfully" });
+});
+
+spaceRouter.get("/all", userMiddleware, async (req, res) => {
+  const spaces = await client.space.findMany({
+    where: {
+      creatorId: req.userId,
+    },
+  });
+
+  if (!spaces) {
+    res.status(400).json({ message: "No spaces found" });
+    return;
+  }
+
+  res.json({
+    spaces: spaces.map((s) => ({
+      id: s.id,
+      name: s.name,
+      thumbnail: s.thumbnail,
+      dimensions: `${s.width}x${s.height}`,
+    })),
+  });
+});
+
+spaceRouter.post("/elmement", userMiddleware, async (req, res) => {
+  const parsedData = AddElementSchema.safeParse(req.body);
+  if (!parsedData.success) {
+    console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors
+    res.status(400).json({
+      message: "Invalid data validation failed",
+      errors: parsedData.error.format(),
+    });
+    return;
+  }
+
+  const space = await client.space.findUnique({
+    where: {
+      id: parsedData.data.spaceId,
+      creatorId: req.userId,
+    },
+    select: {
+      width: true,
+      height: true,
+    },
+  });
+
+  if (!space) {
+    res.status(400).json({ message: "Space not found" });
+    return;
+  }
+
+  await client.spaceElements.create({
+    data: {
+      spaceId: parsedData.data.spaceId,
+      elementId: parsedData.data.elementId,
+      x: parsedData.data.x,
+      y: parsedData.data.y,
+    },
+  });
+
+  res.json({ message: "Element added successfully" });
+});
+
+spaceRouter.delete("/elmement", userMiddleware, async (req, res) => {
+  const parsedData = DeleteElementSchema.safeParse(req.body);
+  if (!parsedData.success) {
+    console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors
+    res.status(400).json({
+      message: "Invalid data validation failed",
+      errors: parsedData.error.format(),
+    });
+    return;
+  }
+
+  const spaceElement = await client.spaceElements.findFirst({
+    where: {
+      id: parsedData.data.id,
+    },
+    include: {
+      space: true,
+    },
+  });
+
+  if (
+    !spaceElement?.space.creatorId ||
+    spaceElement.space.creatorId !== req.userId
+  ) {
+    res.status(403).json({ message: "Unauthorized" });
+    return;
+  }
+
+  await client.spaceElements.delete({
+    where: {
+      id: parsedData.data.id,
+    },
+  });
+});
+
+spaceRouter.get("/:spaceId", userMiddleware, async (req, res) => {
+  const space = await client.space.findUnique({
+    where: {
+      id: req.params.spaceId,
+    },
+    include: {
+      elements: { include: { element: true } },
+    },
+  });
+
+  if (!space) {
+    res.status(400).json({ message: "Space not found" });
+    return;
+  }
+
+  res.json({
+    dimensions: `${space.width}x${space.height}`,
+    elements: space.elements.map((e) => ({
+      id: e.id,
+      element: {
+        id: e.element.id,
+        imageUrl: e.element.imageUrl,
+        width: e.element.width,
+        height: e.element.height,
+        static: e.element.static,
+      },
+      x: e.x,
+      y: e.y,
+    })),
+  });
+});

@@ -28,6 +28,10 @@ export const AddElementSchema = z.object({
   y: z.number(),
 });
 
+export const DeleteElementSchema = z.object({
+  id: z.string(),
+});
+
 export const CreateElementSchema = z.object({
   imageUrl: z.string(),
   width: z.number(),

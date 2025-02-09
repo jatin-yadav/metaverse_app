@@ -40,7 +40,7 @@ model spaceElements {
   spaceId   String
   x         Int
   y         Int
-  scale     Space   @relation(fields: [spaceId], references: [id])
+  space     Space   @relation(fields: [spaceId], references: [id])
   element   Element @relation(fields: [elementId], references: [id])
 }
 
@@ -48,8 +48,10 @@ model Element {
   id       String          @id @unique @default(cuid())
   width    Int
   height   Int
+  static   Boolean
   imageUrl String
   spaces   spaceElements[]
+  maps     mapElements[]
 }
 
 model Map {
@@ -61,12 +63,13 @@ model Map {
 }
 
 model mapElements {
-  id        String @id @unique @default(cuid())
+  id        String  @id @unique @default(cuid())
   mapId     String
   elementId String
   x         Int?
   y         Int?
-  map       Map    @relation(fields: [mapId], references: [id])
+  map       Map     @relation(fields: [mapId], references: [id])
+  Element   Element @relation(fields: [elementId], references: [id])
 }
 
 model Avatar {
