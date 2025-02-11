@@ -11,7 +11,7 @@ import { SigninSchema, SignupSchema } from "../../types";
 import client from "@repo/db/client";
 import { hash, compare } from "../../scrypt";
 import jwt from "jsonwebtoken";
-import { JWT_SCRETE_KEY } from "../../config";
+import { JWT_SECRET_KEY } from "../../config";
 import { log } from "node:console";
 export const router: ExpressRouter = Router();
 
@@ -86,7 +86,7 @@ router.post("/signin", async (req, res) => {
 
     const token = jwt.sign(
       { userID: user.id, role: user.role },
-      JWT_SCRETE_KEY
+      JWT_SECRET_KEY
     );
 
     res.status(200).json({ token });

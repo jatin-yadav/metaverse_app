@@ -1,6 +1,10 @@
 import client from "@repo/db/client";
-import { Router, type Router as ExpressRouter } from "express";
-import { adminMiddleware } from "../../middleware/admin";
+import {
+  Router,
+  type Router as ExpressRouter,
+  Request,
+  Response,
+} from "express";
 import {
   AddElementSchema,
   CreateAvatarSchema,
@@ -8,10 +12,13 @@ import {
   CreateMapSchema,
   UpdateElementSchema,
 } from "../../types";
+import { adminMiddleware } from "../../middleware/admin";
 
 export const adminRouter: ExpressRouter = Router();
 
-adminRouter.post("/element", adminMiddleware, async (req, res) => {
+adminRouter.use(adminMiddleware);
+
+adminRouter.post("/element", async (req: Request, res: Response) => {
   const parsedData = CreateElementSchema.safeParse(req.body);
   if (!parsedData.success) {
     console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors
@@ -34,7 +41,7 @@ adminRouter.post("/element", adminMiddleware, async (req, res) => {
   res.json({ id: element.id, message: "Element created successfully" });
 });
 
-adminRouter.put("/element/:elementId", adminMiddleware, async (req, res) => {
+adminRouter.put("/element/:elementId", async (req, res, next) => {
   const parsedData = UpdateElementSchema.safeParse(req.body);
   if (!parsedData.success) {
     console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors
@@ -55,7 +62,7 @@ adminRouter.put("/element/:elementId", adminMiddleware, async (req, res) => {
   res.json({ message: "Element updated successfully" });
 });
 
-adminRouter.post("/avatar", adminMiddleware, async (req, res) => {
+adminRouter.post("/avatar", async (req, res, next) => {
   try {
     if (!req.userId) {
       res.status(401).json({ message: "Unauthorized: User ID missing" });
@@ -77,12 +84,6 @@ adminRouter.post("/avatar", adminMiddleware, async (req, res) => {
         imageUrl: parsedData.data.imageUrl,
       },
     });
-    console.log("user:", req.userId);
-
-    await client.user.update({
-      where: { id: req.userId },
-      data: { avatarId: avatar.id },
-    });
 
     res.json({ avatarId: avatar.id, message: "Avatar created successfully" });
   } catch (error) {
@@ -95,7 +96,7 @@ adminRouter.post("/avatar", adminMiddleware, async (req, res) => {
   }
 });
 
-adminRouter.get("/map", adminMiddleware, async (req, res) => {
+adminRouter.get("/map", async (req, res, next) => {
   const parsedData = CreateMapSchema.safeParse(req.body);
   if (!parsedData.success) {
     console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors

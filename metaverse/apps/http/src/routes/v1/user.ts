@@ -4,8 +4,9 @@ import { userMiddleware } from "../../middleware/user";
 import client from "@repo/db/client";
 
 export const userRouter: ExpressRouter = Router();
+userRouter.use(userMiddleware);
 
-userRouter.post("/metadata", userMiddleware, async (req, res) => {
+userRouter.post("/metadata", async (req, res) => {
   const parsedData = UpdateMetadataSchema.safeParse(req.body);
   if (!parsedData.success) {
     console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors
@@ -16,6 +17,14 @@ userRouter.post("/metadata", userMiddleware, async (req, res) => {
     return;
   }
 
+  const avatar = await client.avatar.findUnique({
+    where: { id: parsedData.data.avatarId },
+  });
+
+  if (!avatar) {
+    res.status(400).json({ message: "avatar doesn't exist" });
+    return;
+  }
   await client.user.update({
     where: { id: req.userId },
     data: {

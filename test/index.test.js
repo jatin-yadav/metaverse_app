@@ -178,9 +178,7 @@ describe("User metadata endpoint", () => {
       password,
     });
     token = response.data.token;
-  });
 
-  test("admin is able to create thier metadata", async () => {
     const avatarResponse = await axios.post(
       `${BACKEND_URL}/api/v1/admin/avatar`,
       {
@@ -194,51 +192,48 @@ describe("User metadata endpoint", () => {
         },
       }
     );
-    console.log("avatarresponse is ========" + avatarResponse.data.id);
     avatarId = avatarResponse.data.avatarId;
-
-    expect(avatarResponse.status).toBe(200);
   });
 
-  // test("User cant update their metadata with a wrong avatar id", async () => {
-  //   const response = await axios.post(
-  //     `${BACKEND_URL}/api/v1/user/metadata`,
-  //     {
-  //       avatarId: "123123123",
-  //     },
-  //     {
-  //       headers: {
-  //         authorization: `Bearer ${token}`,
-  //       },
-  //     }
-  //   );
+  test("User cant update their metadata with a wrong avatar id", async () => {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/v1/user/metadata`,
+      {
+        avatarId: "123123123",
+      },
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-  //   expect(response.status).toBe(400);
-  // });
+    expect(response.status).toBe(400);
+  });
 
-  // test("User can update their metadata with the right avatar id", async () => {
-  //   const response = await axios.post(
-  //     `${BACKEND_URL}/api/v1/user/metadata`,
-  //     {
-  //       avatarId,
-  //     },
-  //     {
-  //       headers: {
-  //         authorization: `Bearer ${token}`,
-  //       },
-  //     }
-  //   );
+  test("User can update their metadata with the right avatar id", async () => {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/v1/user/metadata`,
+      {
+        avatarId,
+      },
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-  //   expect(response.status).toBe(200);
-  // });
+    expect(response.status).toBe(200);
+  });
 
-  // test("User is not able to update their metadata if the auth header is not present", async () => {
-  //   const response = await axios.post(`${BACKEND_URL}/api/v1/user/metadata`, {
-  //     avatarId,
-  //   });
+  test("User is not able to update their metadata if the auth header is not present", async () => {
+    const response = await axios.post(`${BACKEND_URL}/api/v1/user/metadata`, {
+      avatarId,
+    });
 
-  //   expect(response.status).toBe(403);
-  // });
+    expect(response.status).toBe(403);
+  });
 });
 // =========================================================================================================================
 

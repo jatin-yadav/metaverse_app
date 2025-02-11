@@ -8,7 +8,7 @@ declare global {
 }
 
 import jwt from "jsonwebtoken";
-import { JWT_SCRETE_KEY } from "../config";
+import { JWT_SECRET_KEY } from "../config";
 import { NextFunction, Request, Response } from "express";
 
 export const userMiddleware = (
@@ -25,12 +25,12 @@ export const userMiddleware = (
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SCRETE_KEY) as {
+    const decoded = jwt.verify(token, JWT_SECRET_KEY) as {
       role: string;
-      userId: string;
+      userID: string;
     };
 
-    req.userId = decoded.userId;
+    req.userId = decoded.userID;
     next();
   } catch (err) {
     res.status(401).json({ message: "Unauthorized" });
