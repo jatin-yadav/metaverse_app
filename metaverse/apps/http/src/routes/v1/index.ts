@@ -16,7 +16,6 @@ import { log } from "node:console";
 export const router: ExpressRouter = Router();
 
 router.post("/signup", async (req: Request, res: Response) => {
-  console.log("req body", req.body);
   const parsedData = SignupSchema.safeParse(req.body);
   if (!parsedData.success) {
     console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors

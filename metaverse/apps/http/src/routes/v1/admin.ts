@@ -55,7 +55,7 @@ adminRouter.put("/element/:elementId", adminMiddleware, async (req, res) => {
   res.json({ message: "Element updated successfully" });
 });
 
-adminRouter.get("/avtar", adminMiddleware, async (req, res) => {
+adminRouter.post("/avatar", adminMiddleware, async (req, res) => {
   const parsedData = CreateAvatarSchema.safeParse(req.body);
   if (!parsedData.success) {
     console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors

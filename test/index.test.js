@@ -38,6 +38,10 @@ const axios = {
   },
 };
 
+const randomNumber = () => {
+  return Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+};
+
 test("Check connection to server", async () => {
   const response = await axios.get(`${BACKEND_URL}`);
   expect(response.status).toBe(200);
@@ -45,7 +49,7 @@ test("Check connection to server", async () => {
 
 describe("Authentication", () => {
   test("Admin is able to signup", async () => {
-    const username = `jatin${Math.random()}@test.com`;
+    const username = `jatin${randomNumber()}@test.com`;
     const password = "12345678";
     const reqBody = { username, password, type: "admin" };
 
@@ -110,7 +114,6 @@ describe("Authentication", () => {
       });
       expect(signupResponse.status).toBe(200);
 
-
       // Signin
       const signinResponse = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
         username,
@@ -162,87 +165,84 @@ describe("Authentication", () => {
   });
 });
 
-// describe("User metadata endpoint", () => {
-//   let token = "";
-//   let avatarId = "";
+// =========================================================================================================================
+describe("User metadata endpoint", () => {
+  let token = "";
+  let avatarId = "";
 
-//   beforeAll(async () => {
-//     const username = `kirat-${Math.random()}`;
-//     const password = "123456";
+  beforeAll(async () => {
+    const username = `jatin${randomNumber()}@test.com`;
+    const password = "12345678";
+    const reqBody = { username, password, type: "admin" };
 
-//     await axios.post(`${BACKEND_URL}/api/v1/signup`, {
-//       username,
-//       password,
-//       type: "admin",
-//     });
+    await axios.post(`${BACKEND_URL}/api/v1/signup`, reqBody);
 
-//     const response = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
-//       username,
-//       password,
-//     });
+    const response = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
+      username,
+      password,
+    });
 
-//     token = response.data.token;
+    token = response.data.token;
 
-//     const avatarResponse = await axios.post(
-//       `${BACKEND_URL}/api/v1/admin/avatar`,
-//       {
-//         imageUrl:
-//           "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
-//         name: "Timmy",
-//       },
-//       {
-//         headers: {
-//           authorization: `Bearer ${token}`,
-//         },
-//       }
-//     );
-//     console.log("avatarresponse is " + avatarResponse.data.avatarId);
+    const avatarResponse = await axios.post(
+      `${BACKEND_URL}/api/v1/admin/avatar`,
+      {
+        imageUrl:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
+        name: "Timmy",
+      },
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    console.log("avatarresponse is " + avatarResponse.data);
 
-//     avatarId = avatarResponse.data.avatarId;
-//   });
+    avatarId = avatarResponse.data.avatarId;
+  });
 
-//   test("User cant update their metadata with a wrong avatar id", async () => {
-//     const response = await axios.post(
-//       `${BACKEND_URL}/api/v1/user/metadata`,
-//       {
-//         avatarId: "123123123",
-//       },
-//       {
-//         headers: {
-//           authorization: `Bearer ${token}`,
-//         },
-//       }
-//     );
+  test("User cant update their metadata with a wrong avatar id", async () => {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/v1/user/metadata`,
+      {
+        avatarId: "123123123",
+      },
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-//     expect(response.status).toBe(400);
-//   });
+    expect(response.status).toBe(400);
+  });
 
-//   test("User can update their metadata with the right avatar id", async () => {
-//     const response = await axios.post(
-//       `${BACKEND_URL}/api/v1/user/metadata`,
-//       {
-//         avatarId,
-//       },
-//       {
-//         headers: {
-//           authorization: `Bearer ${token}`,
-//         },
-//       }
-//     );
+  test("User can update their metadata with the right avatar id", async () => {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/v1/user/metadata`,
+      {
+        avatarId,
+      },
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-//     expect(response.status).toBe(200);
-//   });
+    expect(response.status).toBe(200);
+  });
 
-//   test("User is not able to update their metadata if the auth header is not present", async () => {
-//     const response = await axios.post(`${BACKEND_URL}/api/v1/user/metadata`, {
-//       avatarId,
-//     });
+  test("User is not able to update their metadata if the auth header is not present", async () => {
+    const response = await axios.post(`${BACKEND_URL}/api/v1/user/metadata`, {
+      avatarId,
+    });
 
-//     expect(response.status).toBe(403);
-//   });
-
-//   test("test 3", () => {});
-// });
+    expect(response.status).toBe(403);
+  });
+});
+// =========================================================================================================================
 
 // describe("User avatar information", () => {
 //   let avatarId;
