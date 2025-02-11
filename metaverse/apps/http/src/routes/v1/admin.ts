@@ -56,21 +56,43 @@ adminRouter.put("/element/:elementId", adminMiddleware, async (req, res) => {
 });
 
 adminRouter.post("/avatar", adminMiddleware, async (req, res) => {
-  const parsedData = CreateAvatarSchema.safeParse(req.body);
-  if (!parsedData.success) {
-    console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors
-    res.status(400).json({
-      message: "Invalid data validation failed",
-      errors: parsedData.error.format(),
+  try {
+    if (!req.userId) {
+      res.status(401).json({ message: "Unauthorized: User ID missing" });
+      return;
+    }
+    const parsedData = CreateAvatarSchema.safeParse(req.body);
+    if (!parsedData.success) {
+      console.error("❌ Avatar Validation Error:", parsedData.error.format()); // Log detailed errors
+      res.status(400).json({
+        message: "Invalid data validation failed",
+        errors: parsedData.error.format(),
+      });
+      return;
+    }
+
+    const avatar = await client.avatar.create({
+      data: {
+        name: parsedData.data.name,
+        imageUrl: parsedData.data.imageUrl,
+      },
     });
-    return;
+    console.log("user:", req.userId);
+
+    await client.user.update({
+      where: { id: req.userId },
+      data: { avatarId: avatar.id },
+    });
+
+    res.json({ avatarId: avatar.id, message: "Avatar created successfully" });
+  } catch (error) {
+    console.error("❌ Error creating avatar:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: errorMessage });
   }
-
-  const avatar = await client.avatar.create({
-    data: { name: parsedData.data.name, imageUrl: parsedData.data.imageUrl },
-  });
-
-  res.json({ id: avatar.id, message: "Avatar created successfully" });
 });
 
 adminRouter.get("/map", adminMiddleware, async (req, res) => {
