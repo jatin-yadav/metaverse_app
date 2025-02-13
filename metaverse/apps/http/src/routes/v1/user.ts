@@ -39,19 +39,29 @@ userRouter.get("/metadata/bluk", async (req, res) => {
   const userIdString = req.query.userId as string;
   const userIds = userIdString.slice(1, userIdString?.length - 2).split(",");
 
-  const metadata = await client.user.findMany({
-    where: {
-      id: {
-        in: userIds,
-      },
-    },
-    select: { avatarId: true },
-  });
+  try {
+    console.log("|||||||||||REACHED||||||||||||", userIds);
 
-  res.json({
-    avatars: metadata.map((m: any) => ({
-      userId: m.id,
-      avatarId: m.avatarId?.imageUrl,
-    })),
-  });
+    const metadata = await client.user.findMany({
+      where: {
+        id: {
+          in: userIds,
+        },
+      },
+      select: { avatarId: true },
+    });
+
+    console.log("|||||||||||METADATA||||||||||||", metadata);
+
+    res.json({
+      avatars: metadata.map((m: any) => ({
+        userId: m.id,
+        avatarId: m.avatarId?.imageUrl,
+      })),
+    });
+  } catch (error) {
+    console.log("LOG FROM ERROR BOUNDRY", error);
+
+    res.json({ message: (error as Error).message });
+  }
 });

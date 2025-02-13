@@ -162,7 +162,7 @@ describe.skip("Authentication", () => {
 });
 
 // =========================================================================================================================
-describe("User metadata endpoint", () => {
+describe.skip("User metadata endpoint", () => {
   let token = "";
   let avatarId = "";
 
@@ -237,66 +237,71 @@ describe("User metadata endpoint", () => {
 });
 // =========================================================================================================================
 
-// describe("User avatar information", () => {
-//   let avatarId;
-//   let token;
-//   let userId;
+describe("User avatar information", () => {
+  let userId;
+  let token = "";
+  let avatarId = "";
 
-//   beforeAll(async () => {
-//     const username = `kirat-${Math.random()}`;
-//     const password = "123456";
+  beforeAll(async () => {
+    const username = `jatin${randomNumber()}@test.com`;
+    const password = "12345678";
+    const reqBody = { username, password, type: "admin" };
 
-//     const signupResponse = await axios.post(`${BACKEND_URL}/api/v1/signup`, {
-//       username,
-//       password,
-//       type: "admin",
-//     });
+    await axios.post(`${BACKEND_URL}/api/v1/signup`, reqBody);
 
-//     userId = signupResponse.data.userId;
+    const response = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
+      username,
+      password,
+    });
+    token = response.data.token;
 
-//     console.log("userid is " + userId);
-//     const response = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
-//       username,
-//       password,
-//     });
+    const avatarResponse = await axios.post(
+      `${BACKEND_URL}/api/v1/admin/avatar`,
+      {
+        name: "Timmy",
+        imageUrl:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
+      },
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    avatarId = avatarResponse.data.avatarId;
 
-//     token = response.data.token;
+    await axios.post(
+      `${BACKEND_URL}/api/v1/user/metadata`,
+      {
+        avatarId,
+      },
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  });
 
-//     const avatarResponse = await axios.post(
-//       `${BACKEND_URL}/api/v1/admin/avatar`,
-//       {
-//         imageUrl:
-//           "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
-//         name: "Timmy",
-//       },
-//       {
-//         headers: {
-//           authorization: `Bearer ${token}`,
-//         },
-//       }
-//     );
+  test("Get back avatar information for a user", async () => {
+    console.log("asking for user with id " + userId);
+    const response = await axios.get(
+      `${BACKEND_URL}/api/v1/user/metadata/bulk?ids=[${userId}]`
+    );
+    
+    expect(response.data.avatars.length).toBe(1);
+    expect(response.data.avatars[0].userId).toBe(userId);
+  });
 
-//     avatarId = avatarResponse.data.avatarId;
-//   });
+  test("Available avatars lists the recently created avatar", async () => {
+    const response = await axios.get(`${BACKEND_URL}/api/v1/avatars`);
+    expect(response.data.avatars.length).not.toBe(0);
+    const currentAvatar = response.data.avatars.find((x) => x.id == avatarId);
+    expect(currentAvatar).toBeDefined();
+  });
+});
 
-//   test("Get back avatar information for a user", async () => {
-//     console.log("asking for user with id " + userId);
-//     const response = await axios.get(
-//       `${BACKEND_URL}/api/v1/user/metadata/bulk?ids=[${userId}]`
-//     );
-//     console.log("response was " + userId);
-//     console.log(JSON.stringify(response.data));
-//     expect(response.data.avatars.length).toBe(1);
-//     expect(response.data.avatars[0].userId).toBe(userId);
-//   });
-
-//   test("Available avatars lists the recently created avatar", async () => {
-//     const response = await axios.get(`${BACKEND_URL}/api/v1/avatars`);
-//     expect(response.data.avatars.length).not.toBe(0);
-//     const currentAvatar = response.data.avatars.find((x) => x.id == avatarId);
-//     expect(currentAvatar).toBeDefined();
-//   });
-// });
+// =========================================================================================================================
 
 // describe("Space information", () => {
 //   let mapId;
