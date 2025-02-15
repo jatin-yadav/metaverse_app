@@ -247,7 +247,11 @@ describe("User avatar information", () => {
     const password = "12345678";
     const reqBody = { username, password, type: "admin" };
 
-    await axios.post(`${BACKEND_URL}/api/v1/signup`, reqBody);
+    const signUPresponse = await axios.post(
+      `${BACKEND_URL}/api/v1/signup`,
+      reqBody
+    );
+    userId = signUPresponse.data.userID;
 
     const response = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
       username,
@@ -286,7 +290,7 @@ describe("User avatar information", () => {
   test("Get back avatar information for a user", async () => {
     console.log("asking for user with id " + userId);
     const response = await axios.get(
-      `${BACKEND_URL}/api/v1/user/metadata/bulk?{encodeURIComponent(JSON.stringify([userId]))}`,
+      `${BACKEND_URL}/api/v1/user/metadata/bulk?ids=[${userId}]`,
       {
         headers: {
           authorization: `Bearer ${token}`,

@@ -36,8 +36,8 @@ userRouter.post("/metadata", async (req, res) => {
 });
 
 userRouter.get("/metadata/bulk", async (req, res) => {
+  console.log("req.query", req.query);
   const userIdString = req.query.ids as string;
-  console.log("userIdString", userIdString);
   const userIds = userIdString.slice(1, userIdString?.length - 2).split(",");
 
   const metadata = await client.user.findMany({
@@ -48,6 +48,8 @@ userRouter.get("/metadata/bulk", async (req, res) => {
     },
     select: { avatarId: true },
   });
+
+  console.log("CHECK DATA ", metadata);
 
   res.json({
     avatars: metadata.map((m: any) => ({
