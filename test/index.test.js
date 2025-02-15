@@ -286,9 +286,14 @@ describe("User avatar information", () => {
   test("Get back avatar information for a user", async () => {
     console.log("asking for user with id " + userId);
     const response = await axios.get(
-      `${BACKEND_URL}/api/v1/user/metadata/bulk?ids=[${userId}]`
+      `${BACKEND_URL}/api/v1/user/metadata/bulk?{encodeURIComponent(JSON.stringify([userId]))}`,
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      }
     );
-    
+
     expect(response.data.avatars.length).toBe(1);
     expect(response.data.avatars[0].userId).toBe(userId);
   });

@@ -35,33 +35,24 @@ userRouter.post("/metadata", async (req, res) => {
   res.json({ message: "Metadata updated successfully" });
 });
 
-userRouter.get("/metadata/bluk", async (req, res) => {
-  const userIdString = req.query.userId as string;
+userRouter.get("/metadata/bulk", async (req, res) => {
+  const userIdString = req.query.ids as string;
+  console.log("userIdString", userIdString);
   const userIds = userIdString.slice(1, userIdString?.length - 2).split(",");
 
-  try {
-    console.log("|||||||||||REACHED||||||||||||", userIds);
-
-    const metadata = await client.user.findMany({
-      where: {
-        id: {
-          in: userIds,
-        },
+  const metadata = await client.user.findMany({
+    where: {
+      id: {
+        in: userIds,
       },
-      select: { avatarId: true },
-    });
+    },
+    select: { avatarId: true },
+  });
 
-    console.log("|||||||||||METADATA||||||||||||", metadata);
-
-    res.json({
-      avatars: metadata.map((m: any) => ({
-        userId: m.id,
-        avatarId: m.avatarId?.imageUrl,
-      })),
-    });
-  } catch (error) {
-    console.log("LOG FROM ERROR BOUNDRY", error);
-
-    res.json({ message: (error as Error).message });
-  }
+  res.json({
+    avatars: metadata.map((m: any) => ({
+      userId: m.id,
+      avatarId: m.avatarId?.imageUrl,
+    })),
+  });
 });
