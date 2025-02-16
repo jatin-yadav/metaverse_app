@@ -36,15 +36,23 @@ userRouter.post("/metadata", async (req, res) => {
 });
 
 userRouter.get("/metadata/bulk", async (req, res) => {
-  console.log("req.query", req.query);
-  const userIdString = req.query.ids as string;
-  const userIds = userIdString.slice(1, userIdString?.length - 2).split(",");
-  console.log("userIds DATA ", userIds);
+  const userIdString = req.query.ids as string | undefined;
+  let userIds: string[] = [];
+  if (!userIdString) {
+    console.error("No ids provided in query");
+    res.status(400).json({ error: "Missing 'ids' query parameter" });
+    return;
+  } else {
+    userIds = userIdString
+      .slice(1, -1)
+      .split(",")
+      .map((id) => id.trim());
+  }
 
   const metadata = await client.user.findMany({
     where: {
       id: {
-        in: ["cm76izsa90000vqlkiu7ts8mo"],
+        in: userIds,
       },
     },
     select: {
@@ -58,8 +66,6 @@ userRouter.get("/metadata/bulk", async (req, res) => {
       },
     },
   });
-
-  console.log("CHECK DATA ", metadata);
 
   res.json({
     avatars: metadata.map((m: any) => ({

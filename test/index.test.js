@@ -42,12 +42,12 @@ const randomNumber = () => {
   return Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
 };
 
-test.skip("Check connection to server", async () => {
+test("Check connection to server", async () => {
   const response = await axios.get(`${BACKEND_URL}`);
   expect(response.status).toBe(200);
 });
 
-describe.skip("Authentication", () => {
+describe("Authentication", () => {
   test("Admin is able to signup", async () => {
     const username = `jatin${randomNumber()}@test.com`;
     const password = "12345678";
@@ -162,7 +162,7 @@ describe.skip("Authentication", () => {
 });
 
 // =========================================================================================================================
-describe.skip("User metadata endpoint", () => {
+describe("User metadata endpoint", () => {
   let token = "";
   let avatarId = "";
 
@@ -252,7 +252,6 @@ describe("User avatar information", () => {
       reqBody
     );
     userId = signUPresponse.data.userID;
-    console.log("SIGNUP USER ID", userId);
 
     const response = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
       username,
@@ -289,7 +288,6 @@ describe("User avatar information", () => {
   });
 
   test("Get back avatar information for a user", async () => {
-    console.log("asking for user with id " + userId);
     const response = await axios.get(
       `${BACKEND_URL}/api/v1/user/metadata/bulk?ids=[${userId}]`,
       {
@@ -303,7 +301,7 @@ describe("User avatar information", () => {
     expect(response.data.avatars[0].userId).toBe(userId);
   });
 
-  test.skip("Available avatars lists the recently created avatar", async () => {
+  test("Available avatars lists the recently created avatar", async () => {
     const response = await axios.get(`${BACKEND_URL}/api/v1/avatars`);
     expect(response.data.avatars.length).not.toBe(0);
     const currentAvatar = response.data.avatars.find((x) => x.id == avatarId);
