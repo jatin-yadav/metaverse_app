@@ -10,12 +10,17 @@ import { userMiddleware } from "../../middleware/user";
 
 export const spaceRouter: ExpressRouter = Router();
 
-spaceRouter.post("/", userMiddleware, async (req, res) => {
+spaceRouter.use(userMiddleware);
+
+spaceRouter.post("/", async (req, res) => {
   const parsedData = CreateSpaceSchema.safeParse(req.body);
   if (!parsedData.success) {
-    console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors
+    console.error(
+      "❌ CreateSpaceSchema Validation Error:",
+      parsedData.error.format()
+    ); // Log detailed errors
     res.status(400).json({
-      message: "Invalid data validation failed",
+      message: "Invalid data validation failed for CreateSpaceSchema",
       errors: parsedData.error.format(),
     });
     return;
@@ -72,7 +77,7 @@ spaceRouter.post("/", userMiddleware, async (req, res) => {
   res.json({ message: "Space created successfully", spaceId: space.id });
 });
 
-spaceRouter.delete("/:spaceId", userMiddleware, async (req, res) => {
+spaceRouter.delete("/:spaceId", async (req, res) => {
   const space = await client.space.findUnique({
     where: {
       id: req.params.spaceId,
@@ -101,7 +106,7 @@ spaceRouter.delete("/:spaceId", userMiddleware, async (req, res) => {
   res.json({ message: "Space deleted successfully" });
 });
 
-spaceRouter.get("/all", userMiddleware, async (req, res) => {
+spaceRouter.get("/all", async (req, res) => {
   const spaces = await client.space.findMany({
     where: {
       creatorId: req.userId,
@@ -123,7 +128,7 @@ spaceRouter.get("/all", userMiddleware, async (req, res) => {
   });
 });
 
-spaceRouter.post("/elmement", userMiddleware, async (req, res) => {
+spaceRouter.post("/elmement", async (req, res) => {
   const parsedData = AddElementSchema.safeParse(req.body);
   if (!parsedData.success) {
     console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors
@@ -162,7 +167,7 @@ spaceRouter.post("/elmement", userMiddleware, async (req, res) => {
   res.json({ message: "Element added successfully" });
 });
 
-spaceRouter.delete("/elmement", userMiddleware, async (req, res) => {
+spaceRouter.delete("/elmement", async (req, res) => {
   const parsedData = DeleteElementSchema.safeParse(req.body);
   if (!parsedData.success) {
     console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors
@@ -197,7 +202,7 @@ spaceRouter.delete("/elmement", userMiddleware, async (req, res) => {
   });
 });
 
-spaceRouter.get("/:spaceId", userMiddleware, async (req, res) => {
+spaceRouter.get("/:spaceId", async (req, res) => {
   const space = await client.space.findUnique({
     where: {
       id: req.params.spaceId,
