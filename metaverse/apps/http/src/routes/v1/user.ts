@@ -39,14 +39,24 @@ userRouter.get("/metadata/bulk", async (req, res) => {
   console.log("req.query", req.query);
   const userIdString = req.query.ids as string;
   const userIds = userIdString.slice(1, userIdString?.length - 2).split(",");
+  console.log("userIds DATA ", userIds);
 
   const metadata = await client.user.findMany({
     where: {
       id: {
-        in: userIds,
+        in: ["cm76izsa90000vqlkiu7ts8mo"],
       },
     },
-    select: { avatarId: true },
+    select: {
+      id: true,
+      avatarId: true,
+      avatar: {
+        select: {
+          imageUrl: true,
+          name: true,
+        },
+      },
+    },
   });
 
   console.log("CHECK DATA ", metadata);
@@ -54,7 +64,7 @@ userRouter.get("/metadata/bulk", async (req, res) => {
   res.json({
     avatars: metadata.map((m: any) => ({
       userId: m.id,
-      avatarId: m.avatarId?.imageUrl,
+      avatarId: m.avatar?.imageUrl,
     })),
   });
 });
