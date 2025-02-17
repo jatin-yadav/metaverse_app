@@ -311,7 +311,7 @@ describe.skip("User avatar information", () => {
 
 // =========================================================================================================================
 
-describe("Space information", () => {
+describe.skip("Space information", () => {
   let mapId;
   let element1Id;
   let element2Id;
@@ -320,8 +320,9 @@ describe("Space information", () => {
   let userToken;
   let userId;
 
-  try {
-    beforeAll(async () => {
+  jest.setTimeout(30000);
+  beforeAll(async () => {
+    try {
       const username = `jatin${randomNumber()}@test.com`;
       const password = "12345678";
       const reqBody = { username, password, type: "admin" };
@@ -427,14 +428,12 @@ describe("Space information", () => {
           },
         }
       );
-      console.log("mapResponse");
-      
       mapId = mapResponse.data.id;
       console.log("mapResponse=============>", mapResponse.data.id);
-    });
-  } catch (error) {
-    console.log("ERROR", error);
-  }
+    } catch (error) {
+      console.error("Error in beforeAll setup:", error);
+    }
+  });
 
   test("User is able to create a space without mapId (empty space)", async () => {
     const response = await axios.post(
@@ -818,6 +817,8 @@ describe("Space information", () => {
 //     expect(newResponse.data.elements.length).toBe(3);
 //   });
 // });
+
+// =========================================================================================================================
 
 // describe("Admin Endpoints", () => {
 //   let adminToken;

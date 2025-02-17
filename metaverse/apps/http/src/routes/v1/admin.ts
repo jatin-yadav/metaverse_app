@@ -97,8 +97,6 @@ adminRouter.post("/avatar", async (req, res, next) => {
 });
 
 adminRouter.post("/map", async (req, res, next) => {
-  console.log("REACHING UPTO HERE");
-
   const parsedData = CreateMapSchema.safeParse(req.body);
   if (!parsedData.success) {
     console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors
@@ -125,9 +123,6 @@ adminRouter.post("/map", async (req, res, next) => {
         },
       },
     });
-    console.log("MAP RESPONSE UPTO HERE");
-    console.log(map);
-
     res.json({ id: map.id });
   } catch (error) {
     console.log("==============>", error);

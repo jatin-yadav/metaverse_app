@@ -47,7 +47,6 @@ spaceRouter.post("/", async (req, res) => {
       height: true,
     },
   });
-  console.log("MAP FOUND", map);
 
   if (!map) {
     console.log("map not found");
@@ -64,8 +63,6 @@ spaceRouter.post("/", async (req, res) => {
         creatorId: req.userId,
       },
     });
-
-    console.log("SPACE CREATED", createdSpace);
 
     await tx.spaceElements.createMany({
       data: map.mapElements.map((e) => ({
