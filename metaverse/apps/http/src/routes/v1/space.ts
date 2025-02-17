@@ -141,32 +141,37 @@ spaceRouter.post("/elmement", async (req, res) => {
     return;
   }
 
-  const space = await client.space.findUnique({
-    where: {
-      id: parsedData.data.spaceId,
-      creatorId: req.userId,
-    },
-    select: {
-      width: true,
-      height: true,
-    },
-  });
+  try {
+    const space = await client.space.findUnique({
+      where: {
+        id: parsedData.data.spaceId,
+        creatorId: req.userId,
+      },
+      select: {
+        width: true,
+        height: true,
+      },
+    });
 
-  if (!space) {
-    res.status(400).json({ message: "Space not found" });
-    return;
+    if (!space) {
+      res.status(400).json({ message: "Space not found" });
+      return;
+    }
+
+    await client.spaceElements.create({
+      data: {
+        spaceId: parsedData.data.spaceId,
+        elementId: parsedData.data.elementId,
+        x: parsedData.data.x,
+        y: parsedData.data.y,
+      },
+    });
+
+    res.json({ message: "Element added successfully" });
+  } catch (error) {
+    console.log("ERROR=======>CHECK", error);
+    res.status(404).json({ message: "Space error found" });
   }
-
-  await client.spaceElements.create({
-    data: {
-      spaceId: parsedData.data.spaceId,
-      elementId: parsedData.data.elementId,
-      x: parsedData.data.x,
-      y: parsedData.data.y,
-    },
-  });
-
-  res.json({ message: "Element added successfully" });
 });
 
 spaceRouter.delete("/elmement", async (req, res) => {
