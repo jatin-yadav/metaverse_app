@@ -47,13 +47,16 @@ spaceRouter.post("/", async (req, res) => {
       height: true,
     },
   });
+  console.log("MAP FOUND", map);
+
   if (!map) {
+    console.log("map not found");
     res.status(404).json({ message: "Map not found" });
     return;
   }
 
-  let space = await client.$transaction(async () => {
-    const space = await client.space.create({
+  let space = await client.$transaction(async (tx) => {
+    const createdSpace = await tx.space.create({
       data: {
         name: parsedData.data.name,
         width: map.width,
@@ -62,16 +65,18 @@ spaceRouter.post("/", async (req, res) => {
       },
     });
 
-    await client.spaceElements.createMany({
+    console.log("SPACE CREATED", createdSpace);
+
+    await tx.spaceElements.createMany({
       data: map.mapElements.map((e) => ({
-        spaceId: space.id,
+        spaceId: createdSpace.id,
         elementId: e.elementId,
         x: e.x!,
         y: e.y!,
       })),
     });
 
-    return space;
+    return createdSpace;
   });
 
   res.json({ message: "Space created successfully", spaceId: space.id });

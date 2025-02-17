@@ -320,134 +320,121 @@ describe("Space information", () => {
   let userToken;
   let userId;
 
-  beforeAll(async () => {
-    const username = `jatin${randomNumber()}@test.com`;
-    const password = "12345678";
-    const reqBody = { username, password, type: "admin" };
+  try {
+    beforeAll(async () => {
+      const username = `jatin${randomNumber()}@test.com`;
+      const password = "12345678";
+      const reqBody = { username, password, type: "admin" };
 
-    const signupResponse = await axios.post(
-      `${BACKEND_URL}/api/v1/signup`,
-      reqBody
-    );
+      const signupResponse = await axios.post(
+        `${BACKEND_URL}/api/v1/signup`,
+        reqBody
+      );
 
-    adminId = signupResponse.data.userId;
+      adminId = signupResponse.data.userId;
 
-    const response = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
-      username,
-      password,
+      const response = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
+        username,
+        password,
+      });
+
+      adminToken = response.data.token;
+
+      const userSignupResponse = await axios.post(
+        `${BACKEND_URL}/api/v1/signup`,
+        {
+          username: `user_${username}`,
+          password,
+          type: "user",
+        }
+      );
+
+      userId = userSignupResponse.data.userId;
+
+      const userSigninResponse = await axios.post(
+        `${BACKEND_URL}/api/v1/signin`,
+        {
+          username: `user_${username}`,
+          password,
+        }
+      );
+
+      userToken = userSigninResponse.data.token;
+
+      const element1Response = await axios.post(
+        `${BACKEND_URL}/api/v1/admin/element`,
+        {
+          imageUrl:
+            "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
+          width: 1,
+          height: 1,
+          static: true,
+        },
+        {
+          headers: {
+            authorization: `Bearer ${adminToken}`,
+          },
+        }
+      );
+      element1Id = element1Response.data.id;
+      console.log("<================>element1Id", element1Id);
+
+      const element2Response = await axios.post(
+        `${BACKEND_URL}/api/v1/admin/element`,
+        {
+          imageUrl:
+            "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
+          width: 1,
+          height: 1,
+          static: true,
+        },
+        {
+          headers: {
+            authorization: `Bearer ${adminToken}`,
+          },
+        }
+      );
+      element2Id = element2Response.data.id;
+      console.log("<================>element2Id", element2Id);
+
+      const mapResponse = await axios.post(
+        `${BACKEND_URL}/api/v1/admin/map`,
+        {
+          thumbnail: "https://thumbnail.com/a.png",
+          dimensions: "100x200",
+          name: "Test MAP",
+          defaultElements: [
+            {
+              elementId: element1Id,
+              x: 20,
+              y: 20,
+            },
+            {
+              elementId: element1Id,
+              x: 18,
+              y: 20,
+            },
+            {
+              elementId: element2Id,
+              x: 19,
+              y: 20,
+            },
+          ],
+        },
+        {
+          headers: {
+            authorization: `Bearer ${adminToken}`,
+          },
+        }
+      );
+      console.log("mapResponse");
+      
+      mapId = mapResponse.data.id;
+      console.log("mapResponse=============>", mapResponse.data.id);
     });
-
-    adminToken = response.data.token;
-
-    const userSignupResponse = await axios.post(
-      `${BACKEND_URL}/api/v1/signup`,
-      {
-        username: `user_${username}`,
-        password,
-        type: "user",
-      }
-    );
-
-    userId = userSignupResponse.data.userId;
-
-    const userSigninResponse = await axios.post(
-      `${BACKEND_URL}/api/v1/signin`,
-      {
-        username: username + "-user",
-        password,
-      }
-    );
-
-    userToken = userSigninResponse.data.token;
-
-    const element1Response = await axios.post(
-      `${BACKEND_URL}/api/v1/admin/element`,
-      {
-        imageUrl:
-          "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
-        width: 1,
-        height: 1,
-        static: true,
-      },
-      {
-        headers: {
-          authorization: `Bearer ${adminToken}`,
-        },
-      }
-    );
-
-    const element2Response = await axios.post(
-      `${BACKEND_URL}/api/v1/admin/element`,
-      {
-        imageUrl:
-          "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
-        width: 1,
-        height: 1,
-        static: true,
-      },
-      {
-        headers: {
-          authorization: `Bearer ${adminToken}`,
-        },
-      }
-    );
-    element1Id = element1Response.data.id;
-    element2Id = element2Response.data.id;
-    console.log(element2Id);
-    console.log(element1Id);
-    const mapResponse = await axios.post(
-      `${BACKEND_URL}/api/v1/admin/map`,
-      {
-        thumbnail: "https://thumbnail.com/a.png",
-        dimensions: "100x200",
-        name: "Test space",
-        defaultElements: [
-          {
-            elementId: element1Id,
-            x: 20,
-            y: 20,
-          },
-          {
-            elementId: element1Id,
-            x: 18,
-            y: 20,
-          },
-          {
-            elementId: element2Id,
-            x: 19,
-            y: 20,
-          },
-        ],
-      },
-      {
-        headers: {
-          authorization: `Bearer ${adminToken}`,
-        },
-      }
-    );
-    console.log("mapResponse.status");
-    console.log(mapResponse.data.id);
-
-    mapId = mapResponse.data.id;
-  });
-
-  test("User is able to create a space", async () => {
-    const response = await axios.post(
-      `${BACKEND_URL}/api/v1/space`,
-      {
-        name: "Test",
-        dimensions: "100x200",
-        mapId: mapId,
-      },
-      {
-        headers: {
-          authorization: `Bearer ${userToken}`,
-        },
-      }
-    );
-    expect(response.status).toBe(200);
-    expect(response.data.spaceId).toBeDefined();
-  });
+  } catch (error) {
+    console.log("ERROR", error);
+  }
 
   test("User is able to create a space without mapId (empty space)", async () => {
     const response = await axios.post(
@@ -463,6 +450,24 @@ describe("Space information", () => {
       }
     );
 
+    expect(response.data.spaceId).toBeDefined();
+  });
+
+  test("User is able to create a space with mapId", async () => {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/v1/space`,
+      {
+        name: "Test",
+        dimensions: "100x200",
+        mapId,
+      },
+      {
+        headers: {
+          authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
+    expect(response.status).toBe(200);
     expect(response.data.spaceId).toBeDefined();
   });
 

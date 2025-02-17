@@ -96,7 +96,9 @@ adminRouter.post("/avatar", async (req, res, next) => {
   }
 });
 
-adminRouter.get("/map", async (req, res, next) => {
+adminRouter.post("/map", async (req, res, next) => {
+  console.log("REACHING UPTO HERE");
+
   const parsedData = CreateMapSchema.safeParse(req.body);
   if (!parsedData.success) {
     console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors
@@ -107,21 +109,28 @@ adminRouter.get("/map", async (req, res, next) => {
     return;
   }
 
-  const map = await client.map.create({
-    data: {
-      name: parsedData.data.name,
-      width: Number(parsedData.data.dimensions.split("x")[0]),
-      height: Number(parsedData.data.dimensions.split("x")[1]),
-      thumbnail: parsedData.data.thumbnail,
-      mapElements: {
-        create: parsedData.data.defaultElements.map((e) => ({
-          elementId: e.elementId,
-          x: e.x,
-          y: e.y,
-        })),
+  try {
+    const map = await client.map.create({
+      data: {
+        name: parsedData.data.name,
+        width: Number(parsedData.data.dimensions.split("x")[0]),
+        height: Number(parsedData.data.dimensions.split("x")[1]),
+        thumbnail: parsedData.data.thumbnail,
+        mapElements: {
+          create: parsedData.data.defaultElements.map((e) => ({
+            elementId: e.elementId,
+            x: e.x,
+            y: e.y,
+          })),
+        },
       },
-    },
-  });
+    });
+    console.log("MAP RESPONSE UPTO HERE");
+    console.log(map);
 
-  res.json({ id: map.id });
+    res.json({ id: map.id });
+  } catch (error) {
+    console.log("==============>", error);
+    res.status(403).json({ message: "unable to create a map" });
+  }
 });
