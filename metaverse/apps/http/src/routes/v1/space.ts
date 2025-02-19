@@ -130,7 +130,9 @@ spaceRouter.get("/all", async (req, res) => {
   });
 });
 
-spaceRouter.post("/elmement", async (req, res) => {
+spaceRouter.post("/element", async (req, res) => {
+  console.log("FROM POST ROUTE");
+
   const parsedData = AddElementSchema.safeParse(req.body);
   if (!parsedData.success) {
     console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors
@@ -174,25 +176,29 @@ spaceRouter.post("/elmement", async (req, res) => {
   }
 });
 
-spaceRouter.delete("/elmement", async (req, res) => {
-  const parsedData = DeleteElementSchema.safeParse(req.body);
-  if (!parsedData.success) {
-    console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors
-    res.status(400).json({
-      message: "Invalid data validation failed",
-      errors: parsedData.error.format(),
-    });
-    return;
-  }
+spaceRouter.delete("/element/:elementId", async (req, res) => {
+  console.log("FROM DELETE ROUTE");
+
+  // const parsedData = DeleteElementSchema.safeParse(req.body);
+  // if (!parsedData.success) {
+  //   console.error("❌ Validation Error:", parsedData.error.format()); // Log detailed errors
+  //   res.status(400).json({
+  //     message: "Invalid data validation failed",
+  //     errors: parsedData.error.format(),
+  //   });
+  //   return;
+  // }
 
   const spaceElement = await client.spaceElements.findFirst({
     where: {
-      id: parsedData.data.id,
+      id: req.params.elementId,
     },
     include: {
       space: true,
     },
   });
+
+  console.log("FINDED SPACE", spaceElement);
 
   if (
     !spaceElement?.space.creatorId ||
@@ -204,7 +210,7 @@ spaceRouter.delete("/elmement", async (req, res) => {
 
   await client.spaceElements.delete({
     where: {
-      id: parsedData.data.id,
+      id: req.params.elementId,
     },
   });
 });

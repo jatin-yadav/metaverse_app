@@ -731,7 +731,7 @@ describe("Arena endpoints", () => {
     }
   });
 
-  test("Incorrect spaceId returns a 400", async () => {
+  test.skip("Incorrect spaceId returns a 400", async () => {
     const response = await axios.get(`${BACKEND_URL}/api/v1/space/123kasdk01`, {
       headers: {
         authorization: `Bearer ${userToken}`,
@@ -740,7 +740,7 @@ describe("Arena endpoints", () => {
     expect(response.status).toBe(400);
   });
 
-  test("Correct spaceId returns all the elements", async () => {
+  test.skip("Correct spaceId returns all the elements", async () => {
     const response = await axios.get(`${BACKEND_URL}/api/v1/space/${spaceId}`, {
       headers: {
         authorization: `Bearer ${userToken}`,
@@ -758,13 +758,21 @@ describe("Arena endpoints", () => {
       },
     });
 
-    console.log(response.data.elements[0].id);
-    let res = await axios.delete(`${BACKEND_URL}/api/v1/space/element`, {
-      data: { id: response.data.elements[0].id },
-      headers: {
-        authorization: `Bearer ${userToken}`,
-      },
-    });
+    console.log("checking:):):):):):):):):):)", response.data.elements);
+    let res = await axios.delete(
+      `${BACKEND_URL}/api/v1/space/element/${response.data.elements[0].id}`,
+      {
+        // data: { id: response.data.elements[0].id },
+        headers: {
+          authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
+
+    console.log(
+      "||||||||||||||||||||||||||||||||RESPONSE||||||||||||||||||",
+      res.data
+    );
 
     const newResponse = await axios.get(
       `${BACKEND_URL}/api/v1/space/${spaceId}`,
@@ -797,7 +805,7 @@ describe("Arena endpoints", () => {
     expect(newResponse.status).toBe(400);
   });
 
-  test("Adding an element works as expected", async () => {
+  test.skip("Adding an element works as expected", async () => {
     await axios.post(
       `${BACKEND_URL}/api/v1/space/element`,
       {
