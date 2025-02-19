@@ -658,7 +658,6 @@ describe("Arena endpoints", () => {
         }
       );
       element1Id = element1Response.data.id;
-      console.log("<================>element1Id", element1Id);
 
       const element2Response = await axios.post(
         `${BACKEND_URL}/api/v1/admin/element`,
@@ -676,7 +675,6 @@ describe("Arena endpoints", () => {
         }
       );
       element2Id = element2Response.data.id;
-      console.log("<================>element2Id", element2Id);
 
       const mapResponse = await axios.post(
         `${BACKEND_URL}/api/v1/admin/map`,
@@ -709,7 +707,6 @@ describe("Arena endpoints", () => {
         }
       );
       mapId = mapResponse.data.id;
-      console.log("mapResponse=============>", mapResponse.data.id);
 
       const spaceResponse = await axios.post(
         `${BACKEND_URL}/api/v1/space`,
@@ -731,7 +728,7 @@ describe("Arena endpoints", () => {
     }
   });
 
-  test.skip("Incorrect spaceId returns a 400", async () => {
+  test("Incorrect spaceId returns a 400", async () => {
     const response = await axios.get(`${BACKEND_URL}/api/v1/space/123kasdk01`, {
       headers: {
         authorization: `Bearer ${userToken}`,
@@ -740,7 +737,7 @@ describe("Arena endpoints", () => {
     expect(response.status).toBe(400);
   });
 
-  test.skip("Correct spaceId returns all the elements", async () => {
+  test("Correct spaceId returns all the elements", async () => {
     const response = await axios.get(`${BACKEND_URL}/api/v1/space/${spaceId}`, {
       headers: {
         authorization: `Bearer ${userToken}`,
@@ -762,16 +759,10 @@ describe("Arena endpoints", () => {
     let res = await axios.delete(
       `${BACKEND_URL}/api/v1/space/element/${response.data.elements[0].id}`,
       {
-        // data: { id: response.data.elements[0].id },
         headers: {
           authorization: `Bearer ${userToken}`,
         },
       }
-    );
-
-    console.log(
-      "||||||||||||||||||||||||||||||||RESPONSE||||||||||||||||||",
-      res.data
     );
 
     const newResponse = await axios.get(
@@ -805,7 +796,7 @@ describe("Arena endpoints", () => {
     expect(newResponse.status).toBe(400);
   });
 
-  test.skip("Adding an element works as expected", async () => {
+  test("Adding an element works as expected", async () => {
     await axios.post(
       `${BACKEND_URL}/api/v1/space/element`,
       {
