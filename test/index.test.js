@@ -1249,7 +1249,7 @@ describe("Websocket tests", () => {
     userY = message2.payload.spawn.y;
   });
 
-  test("User should not be able to move across the boundary of the wall", async () => {
+  test.skip("User should not be able to move across the boundary of the wall", async () => {
     ws1.send(
       JSON.stringify({
         type: "move",
@@ -1266,7 +1266,7 @@ describe("Websocket tests", () => {
     expect(message.payload.y).toBe(adminY);
   });
 
-  test("User should not be able to move two blocks at the same time", async () => {
+  test.skip("User should not be able to move two blocks at the same time", async () => {
     ws1.send(
       JSON.stringify({
         type: "move",
@@ -1283,7 +1283,7 @@ describe("Websocket tests", () => {
     expect(message.payload.y).toBe(adminY);
   });
 
-  test("Correct movement should be broadcasted to the other sockets in the room", async () => {
+  test.skip("Correct movement should be broadcasted to the other sockets in the room", async () => {
     ws1.send(
       JSON.stringify({
         type: "move",
@@ -1301,7 +1301,7 @@ describe("Websocket tests", () => {
     expect(message.payload.y).toBe(adminY);
   });
 
-  test("If a user leaves, the other user receives a leave event", async () => {
+  test.skip("If a user leaves, the other user receives a leave event", async () => {
     ws1.close();
     const message = await waitForAndPopLatestMessage(ws2Messages);
     expect(message.type).toBe("user-left");

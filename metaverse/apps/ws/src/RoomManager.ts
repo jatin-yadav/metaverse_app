@@ -1,5 +1,5 @@
-import { OutgoingMessage } from "./types";
 import type { User } from "./User";
+import { OutgoingMessage } from "./types";
 
 export class RoomManager {
   rooms: Map<string, User[]> = new Map();
@@ -38,10 +38,9 @@ export class RoomManager {
     if (!this.rooms.has(roomId)) {
       return;
     }
-
     this.rooms.get(roomId)?.forEach((u) => {
-      if (user.id !== user.id) {
-        user.send(message);
+      if (u.id !== user.id) {
+        u.send(message);
       }
     });
   }

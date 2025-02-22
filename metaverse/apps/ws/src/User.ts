@@ -7,7 +7,7 @@ import { JWT_SECRET_KEY } from "./config";
 
 function getRandomString(length: number) {
   const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0987654321";
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
   for (let i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
@@ -21,18 +21,25 @@ export class User {
   private spaceId?: string;
   private x: number;
   private y: number;
+  private ws: WebSocket;
 
-  constructor(private ws: WebSocket) {
+  constructor(ws: WebSocket) {
     this.id = getRandomString(10);
     this.x = 0;
     this.y = 0;
+    this.ws = ws;
+    this.initHandlers();
   }
 
   initHandlers() {
     this.ws.on("message", async (data) => {
+      console.log(data);
       const parsedData = JSON.parse(data.toString());
+      console.log(parsedData);
+      console.log("parsedData");
       switch (parsedData.type) {
         case "join":
+          console.log("jouin receiverdfd");
           const spaceId = parsedData.payload.spaceId;
           const token = parsedData.payload.token;
           const userId = (jwt.verify(token, JWT_SECRET_KEY) as JwtPayload)
@@ -41,22 +48,25 @@ export class User {
             this.ws.close();
             return;
           }
+          console.log("jouin receiverdfd 2");
           this.userId = userId;
           const space = await client.space.findFirst({
             where: {
               id: spaceId,
             },
           });
+          console.log("jouin receiverdfd 3");
           if (!space) {
             this.ws.close();
             return;
           }
+          console.log("jouin receiverdfd 4");
           this.spaceId = spaceId;
           RoomManager.getInstance().addUser(spaceId, this);
           this.x = Math.floor(Math.random() * space?.width!);
           this.y = Math.floor(Math.random() * space?.height!);
           this.send({
-            type: "space-joind",
+            type: "space-joined",
             payload: {
               spawn: {
                 x: this.x,
@@ -65,9 +75,11 @@ export class User {
               users:
                 RoomManager.getInstance()
                   .rooms.get(spaceId)
+                  ?.filter((x) => x.id !== this.id)
                   ?.map((u) => ({ id: u.id })) ?? [],
             },
           });
+          console.log("jouin receiverdf5");
           RoomManager.getInstance().broadcast(
             {
               type: "user-joined",
@@ -94,7 +106,7 @@ export class User {
             this.y = moveY;
             RoomManager.getInstance().broadcast(
               {
-                type: "move",
+                type: "movement",
                 payload: {
                   x: this.x,
                   y: this.y,
@@ -130,6 +142,7 @@ export class User {
     );
     RoomManager.getInstance().removeUser(this, this.spaceId!);
   }
+
   send(payload: OutgoingMessage) {
     this.ws.send(JSON.stringify(payload));
   }
