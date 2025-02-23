@@ -1174,9 +1174,12 @@ describe("Websocket tests", () => {
 
     console.log(spaceResponse.status);
     spaceId = spaceResponse.data.spaceId;
+    console.log("UPTO HERE it is working");
   }
   async function setupWs() {
     ws1 = new WebSocket(WS_URL);
+
+    console.log("================WS1================", ws1);
 
     ws1.onmessage = (event) => {
       console.log("got back adata 1");
@@ -1189,6 +1192,7 @@ describe("Websocket tests", () => {
     });
 
     ws2 = new WebSocket(WS_URL);
+    console.log("================WS2================", ws2);
 
     ws2.onmessage = (event) => {
       console.log("got back data 2");
@@ -1206,7 +1210,7 @@ describe("Websocket tests", () => {
   });
 
   test("Get back ack for joining the space", async () => {
-    console.log("insixce first test");
+    console.log("insixce...... first...... test......");
     ws1.send(
       JSON.stringify({
         type: "join",
