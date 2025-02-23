@@ -2,45 +2,48 @@ import type { User } from "./User";
 import { OutgoingMessage } from "./types";
 
 export class RoomManager {
-  rooms: Map<string, User[]> = new Map();
-  static instance: RoomManager;
+  private static instance: RoomManager;
+  private rooms: Map<string, User[]> = new Map();
 
-  private constructor() {
-    this.rooms = new Map();
+  private constructor() {}
+
+  public static getInstance(): RoomManager {
+    if (!RoomManager.instance) {
+      RoomManager.instance = new RoomManager();
+    }
+    return RoomManager.instance;
   }
 
-  static getInstance() {
-    if (!this.instance) {
-      this.instance = new RoomManager();
+  public addUser(spaceId: string, user: User): void {
+    const users = this.rooms.get(spaceId) ?? [];
+    if (!users.some((u) => u.id === user.id)) {
+      this.rooms.set(spaceId, [...users, user]);
     }
-    return this.instance;
   }
 
-  public removeUser(user: User, spaceId: string) {
-    if (!this.rooms.has(spaceId)) {
-      return;
+  public removeUser(user: User, spaceId: string): void {
+    const users = this.rooms.get(spaceId);
+    if (!users) return;
+
+    const filteredUsers = users.filter((u) => u.id !== user.id);
+    if (filteredUsers.length === 0) {
+      this.rooms.delete(spaceId);
+    } else {
+      this.rooms.set(spaceId, filteredUsers);
     }
-    this.rooms.set(
-      spaceId,
-      this.rooms.get(spaceId)?.filter((u) => u.id !== user.id) ?? []
-    );
   }
 
-  public addUser(spaceId: string, user: User) {
-    if (!this.rooms.has(spaceId)) {
-      this.rooms.set(spaceId, [user]);
-      return;
-    }
-    this.rooms.set(spaceId, [...(this.rooms.get(spaceId) ?? []), user]);
-  }
+  public broadcast(
+    message: OutgoingMessage,
+    sender: User,
+    roomId: string
+  ): void {
+    const users = this.rooms.get(roomId);
+    if (!users || users.length === 0) return;
 
-  public broadcast(message: OutgoingMessage, user: User, roomId: string) {
-    if (!this.rooms.has(roomId)) {
-      return;
-    }
-    this.rooms.get(roomId)?.forEach((u) => {
-      if (u.id !== user.id) {
-        u.send(message);
+    users.forEach((user) => {
+      if (user.id !== sender.id) {
+        user.send(message);
       }
     });
   }
