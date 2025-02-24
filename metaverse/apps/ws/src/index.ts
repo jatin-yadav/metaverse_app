@@ -57,12 +57,12 @@ async function startWebSocketServer() {
   console.log(`🚀 WebSocket server is running on ws://localhost:${PORT}`);
 
   wss.on("connection", function connection(ws) {
-    console.log("User connected");
+    // console.log("User connected");
     let user = new User(ws);
     ws.on("error", console.error);
 
     ws.on("close", () => {
-      console.log("User disconnected");
+      // console.log("User disconnected");
       user?.destroy();
     });
   });

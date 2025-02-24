@@ -1193,7 +1193,7 @@ describe("Websocket tests", () => {
     ws1.onclose = () => console.log("WS1 disconnected 🔌");
 
     ws1.onmessage = (event) => {
-      console.log("Received WS1 message:", event.data);
+      // console.log("Received WS1 message:", event.data);
       ws1Messages.push(JSON.parse(event.data));
     };
 
@@ -1206,7 +1206,7 @@ describe("Websocket tests", () => {
     ws2.onclose = () => console.log("WS2 disconnected 🔌");
 
     ws2.onmessage = (event) => {
-      console.log("Received WS2 message:", event.data);
+      // console.log("Received WS2 message:", event.data);
       ws2Messages.push(JSON.parse(event.data));
     };
 
@@ -1332,5 +1332,33 @@ describe("Websocket tests", () => {
     const message = await waitForAndPopLatestMessage(ws2Messages);
     expect(message.type).toBe("user-left");
     expect(message.payload.userId).toBe(adminUserId);
+  });
+
+  afterAll(async () => {
+    async function closeWs(ws) {
+      return new Promise((resolve) => {
+        if (!ws || ws.readyState === WebSocket.CLOSED) {
+          return resolve();
+        }
+
+        let timeoutId = setTimeout(() => {
+          console.warn("Force-closing WebSocket after timeout");
+          resolve(); // Prevent hanging
+        }, 5000); // 5s safety timeout
+
+        ws.onclose = () => {
+          clearTimeout(timeoutId); // Clear timeout if WebSocket closes
+          resolve();
+        };
+        ws.onerror = () => {
+          clearTimeout(timeoutId);
+          resolve();
+        };
+
+        ws.close();
+      });
+    }
+
+    await Promise.all([closeWs(ws1), closeWs(ws2)]);
   });
 });
