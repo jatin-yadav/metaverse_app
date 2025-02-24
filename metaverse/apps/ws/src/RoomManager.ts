@@ -2,8 +2,8 @@ import type { User } from "./User";
 import { OutgoingMessage } from "./types";
 
 export class RoomManager {
-  private static instance: RoomManager;
-  private rooms: Map<string, User[]> = new Map();
+  rooms: Map<string, User[]> = new Map();
+  static instance: RoomManager;
 
   private constructor() {}
 

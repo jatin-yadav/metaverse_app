@@ -75,6 +75,7 @@ export class User {
                   ?.map((u) => ({ id: u.id })) ?? [],
             },
           });
+
           RoomManager.getInstance().broadcast(
             {
               type: "user-joined",
